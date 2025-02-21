@@ -6,7 +6,7 @@
 Run server :
 
 ```
-uvicorn app.main:app --reload
+uvicorn anontex.main:app --reload
 ```
 
 ### Docker (recommended)
