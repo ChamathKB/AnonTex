@@ -2,8 +2,9 @@ import argparse
 import logging
 import os
 import sys
+from contextlib import asynccontextmanager
 
-import httpx
+import aiohttp
 import uvicorn
 from fastapi import FastAPI, Request, Response
 
@@ -15,8 +16,22 @@ app = FastAPI()
 TARGET = "https://api.openai.com"  # Target server
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage aiohttp session lifecycle using asynccontextmanager."""
+    global session
+    session = aiohttp.ClientSession()
+    yield
+    await session.close()
+
+
+app = FastAPI(lifespan=lifespan)
+
+session: aiohttp.ClientSession = None
+
+
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
-async def reverse_proxy(request: Request, path: str):
+async def reverse_proxy(request: Request, path: str) -> Response:
     """
     Generic reverse proxy endpoint that forwards requests to the target server.
     """
@@ -28,20 +43,20 @@ async def reverse_proxy(request: Request, path: str):
     method = request.method
     logging.debug(f"Received {method} request from {request.client.host} to {url}, headers: {headers}")
 
-    async with httpx.AsyncClient() as client:
-        try:
-            body = await request.body()
-            response = await client.request(method, url, headers=headers, content=body)
-            logging.info(f"Forwarded response from {url}, status: {response.status_code}")
-            print(response.content)
+    try:
+        body = await request.body()
+        async with session.request(method, url, headers=headers, data=body) as response:  # type: ignore
+            response_body = await response.read()
+            logging.info(f"Forwarded response from {url}, status: {response.status}")
+
             return Response(
-                content=response.content,
-                status_code=response.status_code,
+                content=response_body,
+                status_code=response.status,
                 headers=dict(response.headers),
             )
-        except Exception as e:
-            logging.error(f"Error during proxying: {e}")
-            return Response(content=f"Internal Server Error: {e}", status_code=500)
+    except Exception as e:
+        logging.error(f"Error during proxying: {e}")
+        return Response(content=f"Internal Server Error: {e}", status_code=500)
 
 
 def run_server(port, daemon):
