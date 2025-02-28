@@ -31,7 +31,6 @@ async def lifespan(app: FastAPI):
     logging.info("Starting up resources...")
     app.state.analyzer = AnalyzerEngine()
     app.state.anonymizer = AnonymizerEngine()
-    # app.state.redis_client = await aioredis.from_url(REDIS_URL, decode_responses=True)
     app.state.redis_client = redis.from_url(REDIS_URL, decode_responses=True)
     global session
     session = aiohttp.ClientSession()
@@ -76,7 +75,7 @@ async def reverse_proxy(request: Request, path: str) -> Response:
 
             # Extract the content from the response
             response_content = response_body.get("choices", [{}])[0].get("message", {}).get("content", "")
-
+            logging.debug(f"Received response content: {response_content[:100]}...")
             # Deanonymize the response content
             deanonymized_message = await deanonymize_text(response_content, app, request_id)
 
@@ -97,7 +96,7 @@ async def reverse_proxy(request: Request, path: str) -> Response:
         return Response(content=f"Internal Server Error: {e}", status_code=500)
 
 
-def run_server(port, daemon):
+def run_server(port: int, daemon: bool) -> None:
     """
     Starts the FastAPI server with optional daemonization.
     """
