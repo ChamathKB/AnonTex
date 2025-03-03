@@ -1,0 +1,29 @@
+
+services:
+  anontex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anontex
+    working_dir: /usr/src/anontex
+    volumes:
+      - ./anontex:/usr/src/anontex/anontex
+      - ./pyproject.toml:/usr/src/anontex/pyproject.toml
+      - ./poetry.lock:/usr/src/anontex/poetry.lock
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    command: >
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
