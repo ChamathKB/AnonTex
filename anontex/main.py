@@ -7,8 +7,6 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 import aiohttp
-
-# import aioredis
 import redis.asyncio as redis
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -18,7 +16,6 @@ from presidio_anonymizer import AnonymizerEngine
 from anontex.constants import REDIS_URL, TARGET
 from anontex.engines import anonymize_text, deanonymize_text  # type: ignore
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format="[*] %(message)s")
 
 
@@ -71,6 +68,9 @@ async def reverse_proxy(request: Request, path: str) -> Response:
         async with session.request(method, url, headers=headers, json=data) as response:  # type: ignore
             response_body = await response.read()
             logging.info(f"Forwarded response from {url}, status: {response.status}")
+            if response.status != 200:
+                return Response(content=response_body, status_code=response.status, headers=dict(response.headers))
+
             response_body = json.loads(response_body.decode("utf-8"))
 
             # Extract the content from the response
@@ -111,7 +111,6 @@ def run_server(port: int, daemon: bool) -> None:
 
 
 if __name__ == "__main__":
-    # Parse command-line arguments
     parser = argparse.ArgumentParser(description="FastAPI Reverse Proxy Server")
     parser.add_argument("--port", type=int, default=8080, help="Port to listen on (default: 8080)")
     parser.add_argument("--daemon", action="store_true", help="Run as a daemon (background process)")
