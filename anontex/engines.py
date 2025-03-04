@@ -1,15 +1,18 @@
 import json
+from typing import Any
 from uuid import uuid4
 
 from faker import Faker
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 
 from anontex.constants import ENTITY_TTL
 
 fake_generator = Faker()
 
 
-async def anonymize_text(request, app, entities=None, language="en"):
+async def anonymize_text(
+    request: Request, app: Any, entities: list[str] | None, language: str = "en"
+) -> tuple[str, str]:
     """Anonymize message using Presidio Analyzer and Anonymizer with Faker-generated placeholders."""
     analyzer = app.state.analyzer
     # anonymizer = app.state.anonymizer
@@ -19,8 +22,8 @@ async def anonymize_text(request, app, entities=None, language="en"):
     # Analyze text using Presidio Analyzer
     results = analyzer.analyze(text=message, entities=entities, language=language)
 
-    fake_mapping = {}  # Mapping between fake and original values
-    anonymized_message = message  # Start with the original message
+    fake_mapping: dict[str, str] = {}  # Mapping between fake and original values
+    anonymized_message: str = message  # Start with the original message
 
     for entity in sorted(results, key=lambda e: e.start, reverse=True):
         original_value = message[entity.start : entity.end]
@@ -52,7 +55,7 @@ async def anonymize_text(request, app, entities=None, language="en"):
     return anonymized_message, request_id
 
 
-async def deanonymize_text(anonymized_message, app, request_id):
+async def deanonymize_text(anonymized_message: str, app: Any, request_id: str) -> str:
     """Deanonymize text using stored fake-to-original mapping from Redis."""
     redis_client = app.state.redis_client
 
@@ -61,10 +64,10 @@ async def deanonymize_text(anonymized_message, app, request_id):
     if not fake_mapping_json:
         raise HTTPException(status_code=404, detail="Request ID not found or expired")
 
-    fake_mapping = json.loads(fake_mapping_json)
+    fake_mapping: dict[str, str] = json.loads(fake_mapping_json)
 
     # Replace fake values with original values
-    deanonymized_message = anonymized_message
+    deanonymized_message: str = anonymized_message
     for fake_value, original_value in fake_mapping.items():
         deanonymized_message = deanonymized_message.replace(fake_value, original_value)
 
