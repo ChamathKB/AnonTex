@@ -14,7 +14,7 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
 from anontex.constants import REDIS_URL, TARGET
-from anontex.engines import anonymize_text, deanonymize_text  # type: ignore
+from anontex.engines import anonymize_text, deanonymize_text
 
 logging.basicConfig(level=logging.INFO, format="[*] %(message)s")
 
@@ -59,7 +59,7 @@ async def reverse_proxy(request: Request, path: str) -> Response:
     logging.debug(f"Received {method} request from {request.client.host} to {url}, headers: {headers}")
 
     anonymized_message, request_id = await anonymize_text(
-        request, app, entities=["PHONE_NUMBER", "PERSON"], language="en"  # type: ignore
+        request, app, entities=["PHONE_NUMBER", "PERSON"], language="en"
     )
 
     data["messages"][-1]["content"] = anonymized_message
