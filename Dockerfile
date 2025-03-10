@@ -1,20 +1,20 @@
-FROM python:3.11-slim-bookworm
-
-RUN apt-get update -y && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /usr/src/anontex
+FROM python:3.11-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN python -m pip install -U pip poetry
+WORKDIR /usr/src/anontex
+
+RUN apt-get update -y && apt-get install -y gcc && \
+    python -m pip install -U pip poetry && \
+    apt-get remove -y gcc && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN poetry config virtualenvs.create false
 
-COPY pyproject.toml /usr/src/anontex/
-COPY poetry.lock /usr/src/anontex/
+COPY pyproject.toml poetry.lock LICENSE ./
 
-RUN poetry lock --no-update
-RUN poetry install --no-interaction --no-ansi --no-root --without dev
+RUN poetry lock && poetry install --no-interaction --no-ansi --no-root --no-cache
 
 COPY ./anontex /anontex
 
