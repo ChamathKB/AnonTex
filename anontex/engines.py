@@ -39,6 +39,8 @@ async def anonymize_text(
             fake_value = fake_generator.phone_number()
         elif entity.entity_type == "LOCATION":
             fake_value = fake_generator.city()
+        elif entity.entity_type == "CREDIT_CARD":
+            fake_value = fake_generator.credit_card_number()
         else:
             fake_value = fake_generator.word()
 
