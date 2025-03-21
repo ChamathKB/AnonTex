@@ -9,7 +9,7 @@ from typing import Optional
 import aiohttp
 import redis.asyncio as redis
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, Request, Response
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
@@ -54,7 +54,13 @@ async def reverse_proxy(request: Request, path: str) -> Response:
     data = await request.json()
 
     if "messages" not in data or not isinstance(data["messages"], list) or not data["messages"]:
-        raise HTTPException(status_code=400, detail="Invalid messages format.")
+        try:
+            async with session.request(method, url, headers=headers, json=data) as response:  # type: ignore
+                response_body = await response.read()
+                return Response(content=response_body, status_code=response.status, headers=dict(response.headers))
+        except Exception as e:
+            logging.error(f"Error during proxying: {e}")
+            return Response(content=f"Internal Server Error: {e}", status_code=500)
 
     logging.debug(f"Received {method} request from {request.client.host} to {url}, headers: {headers}")
 
