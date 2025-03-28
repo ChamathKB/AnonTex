@@ -29,6 +29,8 @@ dependencies = [
 [project.urls]
 repository = "https://github.com/ChamathKB/AnonTex"
 
+[tool.poetry.scripts]
+anontex = "anontex.anontex_cli:anontex"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
