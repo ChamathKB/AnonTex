@@ -3,11 +3,11 @@
 ## Deployment
 ### Local
 
-Run server :
+Run cli:
+```
+anontex run
+```
 
-```
-uvicorn anontex.main:app
-```
 
 ### Docker (recommended)
 Use docker compose to deploy using docker.
