@@ -30,12 +30,10 @@ def create_app(config_path: Path) -> FastAPI:
         app.state.analyzer = AnalyzerEngine(nlp_engine=provider.create_engine())
         app.state.anonymizer = AnonymizerEngine()
         app.state.redis_client = redis.from_url(REDIS_URL, decode_responses=True)
-        # global session
-        # session = aiohttp.ClientSession()
         app.state.session = aiohttp.ClientSession()
         yield
         logging.info("Shutting down resources...")
-        await app.state.redis_client.close()
+        await app.state.redis_client.aclose()
         await app.state.session.close()
 
     app = FastAPI(lifespan=lifespan)
@@ -51,7 +49,7 @@ def anontex():
 @anontex.command()
 def version() -> None:
     """Display the version of the application."""
-    click.echo("AnonTex v0.1.0")
+    click.echo("AnonTex v0.2.0")
     return
 
 
@@ -76,6 +74,4 @@ def run(config: Path, port: int, host: str):
 
 
 if __name__ == "__main__":
-    # anontex.add_command(version)
-    # anontex.add_command(main)
     anontex()
