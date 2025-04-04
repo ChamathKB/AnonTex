@@ -14,8 +14,7 @@ services:
       - "8000:8000"
     depends_on:
       - redis
-    command: >
-      sh -c "uvicorn anontex.main:app --host 0.0.0.0 --port 8000"
+    command: ["anontex", "run", "--host", "0.0.0.0", --port", "8000"]
 
   redis:
     image: redis:7.0

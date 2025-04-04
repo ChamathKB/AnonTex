@@ -52,8 +52,8 @@ def version() -> None:
 
 @anontex.command()
 @click.option("--config", type=click.Path(exists=True, path_type=Path), required=True, default=DEFAULT_CONFIG_PATH)
-@click.option("--port", type=int, default=8000)
 @click.option("--host", type=str, default="0.0.0.0")
+@click.option("--port", type=int, default=8000)
 @click.option("--log-level", type=click.Choice(LOG_LEVELS.keys()), default="info")
 def run(config: Path, port: int, host: str, log_level: str):
     """Main entry point for the anonymization service"""
