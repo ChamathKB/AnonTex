@@ -12,11 +12,8 @@ from presidio_analyzer.nlp_engine import NlpEngineProvider
 from presidio_anonymizer import AnonymizerEngine
 from pydantic import ValidationError
 
-from anontex.constants import DEFAULT_CONFIG_PATH, REDIS_URL
+from anontex.constants import DEFAULT_CONFIG_PATH, LOG_LEVELS, REDIS_URL
 from anontex.routes.openai_proxy import create_router
-
-logging.basicConfig(level=logging.INFO, format="[*] %(message)s")
-logger = logging.getLogger(__name__)
 
 
 def create_app(config_path: Path) -> FastAPI:
@@ -49,7 +46,7 @@ def anontex():
 @anontex.command()
 def version() -> None:
     """Display the version of the application."""
-    click.echo("AnonTex v0.2.0")
+    click.echo("AnonTex v0.2.1")
     return
 
 
@@ -57,14 +54,17 @@ def version() -> None:
 @click.option("--config", type=click.Path(exists=True, path_type=Path), required=True, default=DEFAULT_CONFIG_PATH)
 @click.option("--port", type=int, default=8000)
 @click.option("--host", type=str, default="0.0.0.0")
-def run(config: Path, port: int, host: str):
+@click.option("--log-level", type=click.Choice(LOG_LEVELS.keys()), default="info")
+def run(config: Path, port: int, host: str, log_level: str):
     """Main entry point for the anonymization service"""
+    logging.basicConfig(level=LOG_LEVELS[log_level.lower()], format="[*] %(message)s")
+    logger = logging.getLogger(__name__)
     try:
         app = create_app(config_path=config)
         router = create_router(app)
         app.include_router(router)
         logging.info(f"Starting FastAPI server on port {port}")
-        uvicorn.run(app, host=host, port=port, log_level="debug")
+        uvicorn.run(app, host=host, port=port, log_level=log_level)
     except ValidationError as e:
         logger.error(f"Configuration error: {e}")
         raise click.Abort()
