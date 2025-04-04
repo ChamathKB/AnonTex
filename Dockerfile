@@ -18,6 +18,10 @@ RUN poetry lock && poetry install --no-interaction --no-ansi --no-root --no-cach
 
 COPY ./anontex /anontex
 
+RUN poetry build
+
+RUN pip install dist/*.whl && rm -rf dist
+
 EXPOSE 8000
 
-CMD uvicorn anontex.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS:-1}
+CMD ["anontex", "run"]
