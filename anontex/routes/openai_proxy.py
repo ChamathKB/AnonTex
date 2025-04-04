@@ -6,8 +6,6 @@ from fastapi import APIRouter, FastAPI, Request, Response
 from anontex.constants import ENTITY_LIST, TARGET
 from anontex.engines import anonymize_text, deanonymize_text
 
-logging.basicConfig(level=logging.INFO, format="[*] %(message)s")
-
 
 def create_router(app: FastAPI) -> APIRouter:
     router = APIRouter()
