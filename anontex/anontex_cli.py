@@ -22,14 +22,14 @@ def create_app(config_path: Path) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         """Manage the lifespan of the application."""
-        logging.info("Starting up resources...")
+        logging.info("🟢️ Starting up resources...")
         provider = NlpEngineProvider(conf_file=config_path)
         app.state.analyzer = AnalyzerEngine(nlp_engine=provider.create_engine())
         app.state.anonymizer = AnonymizerEngine()
         app.state.redis_client = redis.from_url(REDIS_URL, decode_responses=True)
         app.state.session = aiohttp.ClientSession()
         yield
-        logging.info("Shutting down resources...")
+        logging.info("🔴️ Shutting down resources...")
         await app.state.redis_client.aclose()
         await app.state.session.close()
 
@@ -46,7 +46,10 @@ def anontex():
 @anontex.command()
 def version() -> None:
     """Display the version of the application."""
-    click.echo("AnonTex v0.2.1")
+    from importlib.metadata import version
+
+    PACKAGE = "anontex"
+    click.echo(f"🎭️ AnonTex v{version(PACKAGE)}")
     return
 
 
@@ -63,13 +66,13 @@ def run(config: Path, port: int, host: str, log_level: str):
         app = create_app(config_path=config)
         router = create_router(app)
         app.include_router(router)
-        logging.info(f"Starting FastAPI server on port {port}")
+        logging.info(f"⚙️ Starting FastAPI server on port {port}")
         uvicorn.run(app, host=host, port=port, log_level=log_level)
     except ValidationError as e:
-        logger.error(f"Configuration error: {e}")
+        logger.error(f"❌️ Configuration error: {e}")
         raise click.Abort()
     except Exception as e:
-        logger.error(f"Failed to start service: {e}")
+        logger.error(f"❌️ Failed to start service: {e}")
         raise click.Abort()
 
 

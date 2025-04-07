@@ -29,10 +29,10 @@ def create_router(app: FastAPI) -> APIRouter:
                     response_body = await response.read()
                     return Response(content=response_body, status_code=response.status, headers=dict(response.headers))
             except Exception as e:
-                logging.error(f"Error during proxying: {e}")
+                logging.error(f"⚠️ Error during proxying: {e}")
                 return Response(content=f"Internal Server Error: {e}", status_code=500)
 
-        logging.debug(f"Received {method} request from {request.client.host} to {url}, headers: {headers}")
+        logging.debug(f"🔍️ Received {method} request from {request.client.host} to {url}, headers: {headers}")
 
         anonymized_message, request_id = await anonymize_text(request, app, entities=ENTITY_LIST, language="en")
 
@@ -41,7 +41,7 @@ def create_router(app: FastAPI) -> APIRouter:
         try:
             async with session.request(method, url, headers=headers, json=data) as response:  # type: ignore
                 response_body = await response.read()
-                logging.info(f"Forwarded response from {url}, status: {response.status}")
+                logging.info(f"ℹ️ Forwarded response from {url}, status: {response.status}")
                 if response.status != 200:
                     return Response(content=response_body, status_code=response.status, headers=dict(response.headers))
 
@@ -49,7 +49,7 @@ def create_router(app: FastAPI) -> APIRouter:
 
                 # Extract the content from the response
                 response_content = response_body.get("choices", [{}])[0].get("message", {}).get("content", "")
-                logging.debug(f"Received response content: {response_content[:100]}...")
+                logging.debug(f"🔍️ Received response content: {response_content[:100]}...")
                 # Deanonymize the response content
                 deanonymized_message = await deanonymize_text(response_content, app, request_id)
 
@@ -58,7 +58,7 @@ def create_router(app: FastAPI) -> APIRouter:
                     if "message" in response_body["choices"][0]:
                         response_body["choices"][0]["message"]["content"] = deanonymized_message
 
-                logging.debug(f"Deanonymized response: {deanonymized_message[:100]}...")
+                logging.debug(f"🔍️ Deanonymized response: {deanonymized_message[:100]}...")
 
                 return Response(
                     content=json.dumps(response_body),
@@ -66,7 +66,7 @@ def create_router(app: FastAPI) -> APIRouter:
                     headers=dict(response.headers),
                 )
         except Exception as e:
-            logging.error(f"Error during proxying: {e}")
+            logging.error(f"⚠️ Error during proxying: {e}")
             return Response(content=f"Internal Server Error: {e}", status_code=500)
 
     return router
