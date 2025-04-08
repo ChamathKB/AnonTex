@@ -1,4 +1,6 @@
 import json
+import logging
+import re
 from typing import Any
 from uuid import uuid4
 
@@ -8,6 +10,31 @@ from fastapi import HTTPException, Request
 from anontex.constants import ENTITY_TTL
 
 fake_generator = Faker()
+
+
+def _normalize_subcomponents(message: str, fake_mapping: dict[str, str]) -> str:
+    """Ensure all components of fake values are restored to the full fake value."""
+    for full_fake_value in sorted(fake_mapping.keys(), key=lambda x: -len(x)):
+        components = full_fake_value.split()
+
+        for comp in components:
+            # Escape for regex safety
+            escaped_comp = re.escape(comp)
+
+            # Use word-boundary to avoid partial word matches
+            pattern = rf"\b{escaped_comp}\b"
+
+            # Only replace if component is not already part of full fake
+            def repl(match):
+                matched_word = match.group(0)
+                if matched_word != full_fake_value and full_fake_value not in message:
+                    logging.debug(f"🧩 Normalizing component '{matched_word}' → '{full_fake_value}'")
+                    return full_fake_value
+                return matched_word
+
+            message = re.sub(pattern, repl, message)
+
+    return message
 
 
 async def anonymize_text(
@@ -46,6 +73,7 @@ async def anonymize_text(
 
         # Store mapping of fake to original value
         fake_mapping[fake_value] = original_value
+        logging.debug(f"🔍️ Anonymizing {entity.entity_type}: {original_value} -> {fake_value}")
 
         # Replace the original entity with the fake value in the anonymized text
         anonymized_message = anonymized_message[: entity.start] + fake_value + anonymized_message[entity.end :]
@@ -67,13 +95,21 @@ async def deanonymize_text(anonymized_message: str, app: Any, request_id: str) -
         raise HTTPException(status_code=404, detail="Request ID not found or expired")
 
     fake_mapping: dict[str, str] = json.loads(fake_mapping_json)
+    logging.debug(f"🔍️ Deanonymizing {fake_mapping}")
 
     # Replace fake values with original values
-    deanonymized_message: str = anonymized_message
-    for fake_value, original_value in fake_mapping.items():
-        deanonymized_message = deanonymized_message.replace(fake_value, original_value)
+    message = _normalize_subcomponents(anonymized_message, fake_mapping)
+
+    # Step 2: Replace full fake values with original ones
+    for fake_value, original_value in sorted(fake_mapping.items(), key=lambda x: -len(x[0])):
+        logging.debug(f"🔁 Replacing '{fake_value}' → '{original_value}'")
+        escaped_fake = re.escape(fake_value)
+        pattern = rf"\b{escaped_fake}\b"
+        message = re.sub(pattern, original_value, message)
+
+    logging.debug(f"🔍️ Deanonymized message: {message[:100]}...")
 
     # Optionally, delete mapping after use
     await redis_client.delete(f"entity:{request_id}")
 
-    return deanonymized_message
+    return message
