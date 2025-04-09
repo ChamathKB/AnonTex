@@ -1,13 +1,13 @@
 import json
 import logging
 import re
-from typing import Any
 from uuid import uuid4
 
 from faker import Faker
-from fastapi import HTTPException, Request
+from fastapi import FastAPI, Request
 
 from anontex.constants import ENTITY_TTL
+from anontex.exceptions import RequestIDError
 
 fake_generator = Faker()
 
@@ -38,7 +38,7 @@ def _normalize_subcomponents(message: str, fake_mapping: dict[str, str]) -> str:
 
 
 async def anonymize_text(
-    request: Request, app: Any, entities: list[str] | None, language: str = "en"
+    request: Request, app: FastAPI, entities: list[str] | None, language: str = "en"
 ) -> tuple[str, str]:
     """Anonymize message using Presidio Analyzer and Anonymizer with Faker-generated placeholders."""
     analyzer = app.state.analyzer
@@ -85,14 +85,14 @@ async def anonymize_text(
     return anonymized_message, request_id
 
 
-async def deanonymize_text(anonymized_message: str, app: Any, request_id: str) -> str:
+async def deanonymize_text(anonymized_message: str, app: FastAPI, request_id: str) -> str:
     """Deanonymize text using stored fake-to-original mapping from Redis."""
     redis_client = app.state.redis_client
 
     # Retrieve the mapping from Redis
     fake_mapping_json = await redis_client.get(f"entity:{request_id}")
     if not fake_mapping_json:
-        raise HTTPException(status_code=404, detail="Request ID not found or expired")
+        raise RequestIDError(f"Request ID {request_id} not found in Redis")
 
     fake_mapping: dict[str, str] = json.loads(fake_mapping_json)
     logging.debug(f"🔍️ Deanonymizing {fake_mapping}")
@@ -107,9 +107,6 @@ async def deanonymize_text(anonymized_message: str, app: Any, request_id: str) -
         pattern = rf"\b{escaped_fake}\b"
         message = re.sub(pattern, original_value, message)
 
-    logging.debug(f"🔍️ Deanonymized message: {message[:100]}...")
-
-    # Optionally, delete mapping after use
     await redis_client.delete(f"entity:{request_id}")
 
     return message
