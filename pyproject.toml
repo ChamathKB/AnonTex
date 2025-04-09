@@ -1,6 +1,6 @@
 [project]
 name = "anontex"
-version = "0.2.2"
+version = "0.2.3"
 description = "PII anonymizer as a LLM proxy"
 authors = [
     {name = "Chamath Attanyaka", email = "kaushalyabandaraatta@gmail.com"}
