@@ -3,7 +3,7 @@ import logging
 
 from fastapi import APIRouter, FastAPI, Request, Response
 
-from anontex.constants import ENTITY_LIST, TARGET
+from anontex.constants import ENTITY_LIST, LANGUAGE, TARGET
 from anontex.engines import anonymize_text, deanonymize_text
 
 
@@ -34,7 +34,7 @@ def create_router(app: FastAPI) -> APIRouter:
 
         logging.debug(f"🔍️ Received {method} request from {request.client.host} to {url}, headers: {headers}")
 
-        anonymized_message, request_id = await anonymize_text(request, app, entities=ENTITY_LIST, language="en")
+        anonymized_message, request_id = await anonymize_text(request, app, entities=ENTITY_LIST, language=LANGUAGE)
 
         data["messages"][-1]["content"] = anonymized_message
 
