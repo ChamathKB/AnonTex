@@ -47,13 +47,11 @@ def create_router(app: FastAPI) -> APIRouter:
 
                 response_body = json.loads(response_body.decode("utf-8"))
 
-                # Extract the content from the response
                 response_content = response_body.get("choices", [{}])[0].get("message", {}).get("content", "")
                 logging.debug(f"🔍️ Received response content: {response_content[:100]}...")
-                # Deanonymize the response content
+
                 deanonymized_message = await deanonymize_text(response_content, app, request_id)
 
-                # Update the response with deanonymized content
                 if "choices" in response_body and len(response_body["choices"]) > 0:
                     if "message" in response_body["choices"][0]:
                         response_body["choices"][0]["message"]["content"] = deanonymized_message
