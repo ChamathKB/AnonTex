@@ -42,7 +42,6 @@ async def anonymize_text(
 ) -> tuple[str, str]:
     """Anonymize message using Presidio Analyzer and Anonymizer with Faker-generated placeholders."""
     analyzer = app.state.analyzer
-    # anonymizer = app.state.anonymizer
     redis_client = app.state.redis_client
     message = json.loads(await request.body())["messages"][-1]["content"]
 

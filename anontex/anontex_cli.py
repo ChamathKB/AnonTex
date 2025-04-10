@@ -9,7 +9,6 @@ import uvicorn
 from fastapi import FastAPI
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import NlpEngineProvider
-from presidio_anonymizer import AnonymizerEngine
 from pydantic import ValidationError
 
 from anontex.constants import DEFAULT_CONFIG_PATH, LOG_LEVELS, REDIS_URL
@@ -25,7 +24,6 @@ def create_app(config_path: Path) -> FastAPI:
         logging.info("🟢️ Starting up resources...")
         provider = NlpEngineProvider(conf_file=config_path)
         app.state.analyzer = AnalyzerEngine(nlp_engine=provider.create_engine())
-        app.state.anonymizer = AnonymizerEngine()
         app.state.redis_client = redis.from_url(REDIS_URL, decode_responses=True)
         app.state.session = aiohttp.ClientSession()
         yield
