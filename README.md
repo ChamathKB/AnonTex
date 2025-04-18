@@ -111,71 +111,23 @@ anontex run
 - `--log-level`: Logging level (default: `info`)
 
 #### Config File
-
-You can pass settings via a YAML config file:
-
-```yaml
-# default
-nlp_engine_name: spacy
-models:
-  -
-    lang_code: en
-    model_name: en_core_web_lg
-
-ner_model_configuration:
-  model_to_presidio_entity_mapping:
-    PER: PERSON
-    PERSON: PERSON
-    NORP: NRP
-    FAC: LOCATION
-    LOC: LOCATION
-    GPE: LOCATION
-    LOCATION: LOCATION
-    ORG: ORGANIZATION
-    ORGANIZATION: ORGANIZATION
-    DATE: DATE_TIME
-    TIME: DATE_TIME
-
-  low_confidence_score_multiplier: 0.4
-  low_score_entity_names:
-  -
-  labels_to_ignore:
-  - ORGANIZATION # Has many false positives
-  - CARDINAL
-  - EVENT
-  - LANGUAGE
-  - LAW
-  - MONEY
-  - ORDINAL
-  - PERCENT
-  - PRODUCT
-  - QUANTITY
-  - WORK_OF_ART
-```
+You can pass settings via a YAML config file. Read following documentation to customize [config file](https://github.com/ChamathKB/AnonTex/wiki/Config-File).
+> This project use `presidio-analyzer` python package as as entitiy ditector. You can use default config file without specifyin or point to `presidio-analyzer` supported [config file](https://microsoft.github.io/presidio/analyzer/customizing_nlp_models/#Configure-Presidio-to-use-the-new-model).
 
 #### .env File
 
-Additional configurations can be done environment variables via `.env`:
-
-```
-# Target server (OpenAI chat completion compatible API endpoint ex: https://api.openai.com)
-TARGET=
-# Redis connection URL for caching
-REDIS_URL=
-# Time-to-live duration for cached entities
-ENTITY_TTL=
-# Default path to analyzer configuration file
-DEFAULT_CONFIG_PATH=
-# Language to detect by analyzer
-LANGUAGE=
-```
-If `.env` not set default values will be used.
+Additional configurations can be done environment variables via `.env` file.
+If `.env` not set default values will be used. Read following documentation to customize [.env file](https://github.com/ChamathKB/AnonTex/wiki/Configuring-.env-File).
 
 ---
 
 ## 🐳 Docker Deployment
 
-You can deploy AnonTex with Docker using Docker Compose:
+You can deploy AnonTex with Docker using Docker Compose.
+### Clone repo:
+```bash
+git clone https://github.com/ChamathKB/AnonTex
+```
 
 ### Run:
 
