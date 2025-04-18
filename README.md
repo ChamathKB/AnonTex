@@ -107,17 +107,17 @@ anontex run
 
 - `--host`: Server host (default: `0.0.0.0`)
 - `--port`: Server port (default: `8000`)
-- `--config`: Path to configuration file
+- `--config`: Path to configuration file (default: `spacy` engine configs)
 - `--log-level`: Logging level (default: `info`)
 
-#### Config File
-You can pass settings via a YAML config file. Read following documentation to customize [config file](https://github.com/ChamathKB/AnonTex/wiki/Config-File).
-> This project use `presidio-analyzer` python package as as entitiy ditector. You can use default config file without specifyin or point to `presidio-analyzer` supported [config file](https://microsoft.github.io/presidio/analyzer/customizing_nlp_models/#Configure-Presidio-to-use-the-new-model).
+#### Config File (Optional)
+You can pass settings via a YAML config file. Read the following documentation to customize the [config file](https://github.com/ChamathKB/AnonTex/wiki/Config-File).
+> This project uses the `presidio-analyzer` Python package as an entity detector. You can use the default config file without specifying a custom file or point to a `presidio-analyzer` supported [config file](https://microsoft.github.io/presidio/analyzer/customizing_nlp_models/#Configure-Presidio-to-use-the-new-model).
 
-#### .env File
+#### .env File (Optional)
 
-Additional configurations can be done environment variables via `.env` file.
-If `.env` not set default values will be used. Read following documentation to customize [.env file](https://github.com/ChamathKB/AnonTex/wiki/Configuring-.env-File).
+Additional configurations can be done via environment variables in a `.env` file.
+If `.env` is not set, default values will be used. Read the following documentation to customize the [.env file](https://github.com/ChamathKB/AnonTex/wiki/Configuring-.env-File).
 
 ---
 
