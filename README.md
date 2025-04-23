@@ -68,7 +68,7 @@ response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "My email is john@example.com."}
+        {"role": "user", "content": "Hello! My name is John Smith"}
     ]
 )
 
@@ -86,7 +86,7 @@ chat = ChatOpenAI(
     openai_api_base="http://localhost:8000/v1"
 )
 
-messages = [HumanMessage(content="My phone number is 123-456-7890.")]
+messages = [HumanMessage(content="Hello! My name is John Smith")]
 response = chat(messages)
 print(response.content)
 ```
