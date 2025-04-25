@@ -1,6 +1,6 @@
 [project]
 name = "anontex"
-version = "0.2.4"
+version = "0.2.5"
 description = "PII anonymizer as a LLM proxy"
 authors = [
     {name = "Chamath Attanyaka", email = "kaushalyabandaraatta@gmail.com"}
@@ -24,6 +24,10 @@ dependencies = [
     "presidio-analyzer ==2.2.355",
     "click (>=8.1.8,<9.0.0)",
 ]
+
+[project.optional-dependencies]
+transformers = ["presidio_analyzer[transformers] ==2.2.355"]
+dev = ["black", "isort", "flake8", "mypy"]
 
 [project.urls]
 repository = "https://github.com/ChamathKB/AnonTex"
