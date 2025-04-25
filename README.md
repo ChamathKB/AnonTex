@@ -25,6 +25,10 @@ pip install anontex
 > ✅ **Note:** Redis is a required external dependency for caching and PII management.
 Make sure you have Redis running locally or remotely.
 
+##### for additional dependencies with transformers:
+```bash
+pip install anontex[transformers]
+```
 ---
 
 ## 🚀 Usage
