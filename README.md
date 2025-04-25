@@ -10,7 +10,6 @@
 
 - Acts as a transparent proxy for OpenAI's chat completion endpoint.
 - Automatically anonymizes user input using PII detection.
-- Compatible with OpenAI clients, such as the OpenAI Python SDK and LangChain.
 - Redis-backed for entity management and fast caching.
 
 ---
@@ -52,43 +51,6 @@ curl --request POST \
       }
     ]
   }'
-```
-
-### 🐍 Example with OpenAI Python SDK
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="http://localhost:8000/v1",
-    api_key="YOUR-OPENAI-API-KEY"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello! My name is John Smith"}
-    ]
-)
-
-print(response.choices[0].message.content)
-```
-
-### 🔗 Example with LangChain
-
-```python
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage
-
-chat = ChatOpenAI(
-    openai_api_key="YOUR-OPENAI-API-KEY",
-    openai_api_base="http://localhost:8000/v1"
-)
-
-messages = [HumanMessage(content="Hello! My name is John Smith")]
-response = chat(messages)
-print(response.content)
 ```
 
 ---
