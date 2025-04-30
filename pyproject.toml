@@ -1,6 +1,6 @@
 [project]
 name = "anontex"
-version = "0.2.5"
+version = "0.2.6"
 description = "PII anonymizer as a LLM proxy"
 authors = [
     {name = "Chamath Attanyaka", email = "kaushalyabandaraatta@gmail.com"}
@@ -23,6 +23,7 @@ dependencies = [
     "faker (>=36.1.1,<37.0.0)",
     "presidio-analyzer ==2.2.355",
     "click (>=8.1.8,<9.0.0)",
+    "pytest (>=8.3.5,<9.0.0)",
 ]
 
 [project.optional-dependencies]
